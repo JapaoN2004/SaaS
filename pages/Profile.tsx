@@ -1,5 +1,5 @@
 // Profile Page UI Update
-import React from 'react';
+import React, { useState } from 'react';
 import { User, LogOut, Shield, Mail, Hash, Activity } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -7,8 +7,25 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 
 export const Profile: React.FC = () => {
-    const { user, signOut } = useAuth();
+    const { user, signOut, resetPassword } = useAuth();
     const navigate = useNavigate();
+    const [isResetting, setIsResetting] = useState(false);
+    const [resetMessage, setResetMessage] = useState('');
+
+    const handleResetPassword = async () => {
+        if (!user?.email) return;
+        setIsResetting(true);
+        try {
+            await resetPassword(user.email);
+            setResetMessage('Email enviado! Verifique sua caixa de entrada.');
+            setTimeout(() => setResetMessage(''), 5000);
+        } catch (error) {
+            console.error('Error sending reset email:', error);
+            setResetMessage('Erro ao enviar.');
+        } finally {
+            setIsResetting(false);
+        }
+    };
 
     const handleSignOut = async () => {
         try {
@@ -97,16 +114,26 @@ export const Profile: React.FC = () => {
                                     <Shield size={14} className="mr-2" />
                                     Segurança
                                 </h3>
-                                <button className="group flex items-center justify-between w-full p-4 glass-panel border border-slate-700/50 rounded-xl hover:bg-blue-600/10 hover:border-blue-500/30 transition-all duration-300">
+                                <button
+                                    onClick={handleResetPassword}
+                                    disabled={isResetting || !!resetMessage}
+                                    className="group flex items-center justify-between w-full p-4 glass-panel border border-slate-700/50 rounded-xl hover:bg-blue-600/10 hover:border-blue-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
                                     <div className="flex items-center">
                                         <div className="bg-slate-800/80 p-2 rounded-lg mr-4 group-hover:bg-blue-600/20 transition-colors">
                                             <Shield className="text-slate-400 group-hover:text-blue-400" size={20} />
                                         </div>
                                         <span className="text-slate-200 font-medium">Alterar Senha</span>
                                     </div>
-                                    <span className="text-xs bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full opacity-80 group-hover:opacity-100 transition-opacity">
-                                        Em breve
-                                    </span>
+                                    {resetMessage ? (
+                                        <span className="text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full">
+                                            {resetMessage}
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full opacity-80 group-hover:opacity-100 transition-opacity">
+                                            {isResetting ? 'Enviando...' : 'Enviar Email'}
+                                        </span>
+                                    )}
                                 </button>
                             </div>
 
