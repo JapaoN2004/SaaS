@@ -3,7 +3,6 @@
     "deno.enablePaths": [
         "./supabase/functions"
     ],
-    "deno.path": "C:\\Users\\06763599145\\.deno\\bin\\deno.exe",
     "deno.config": "./supabase/functions/deno.json",
     "deno.unstable": true
 }
