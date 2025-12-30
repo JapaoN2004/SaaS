@@ -8,7 +8,7 @@ export const Header: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <header className="bg-brand-dark text-white shadow-lg sticky top-0 z-50">
+    <header className="bg-slate-900/95 backdrop-blur-md text-white shadow-lg sticky top-0 z-50 transition-all border-b border-white/5">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-3 hover:opacity-90 transition-opacity">
           <div className="bg-blue-600 p-2 rounded-lg">
