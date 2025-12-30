@@ -1,3 +1,4 @@
+// Profile Page UI Update
 import React from 'react';
 import { User, LogOut, Shield, Mail, Hash, Activity } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
