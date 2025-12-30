@@ -1,26 +1,50 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ShieldCheck, Mail, ArrowRight, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ShieldCheck, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../services/supabase';
 
-export const ForgotPassword: React.FC = () => {
-    const [email, setEmail] = useState('');
+export const ResetPassword: React.FC = () => {
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const { resetPassword } = useAuth();
+    const { updatePassword } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Verify if we have a hash which indicates a password recovery flow
+        const hash = window.location.hash;
+        if (!hash || !hash.includes('type=recovery')) {
+            // Ideally we should warn, but let's just let them try or redirect if session is invalid
+        }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setMessage('');
+
+        if (password !== confirmPassword) {
+            return setError('As senhas não coincidem');
+        }
+
+        if (password.length < 6) {
+            return setError('A senha deve ter pelo menos 6 caracteres');
+        }
+
         setIsLoading(true);
 
         try {
-            const { error } = await resetPassword(email);
+            const { error } = await updatePassword(password);
             if (error) throw error;
-            setMessage('Verifique seu email para redefinir sua senha.');
+            setMessage('Senha redefinida com sucesso! Redirecionando...');
+            setTimeout(() => {
+                navigate('/login');
+            }, 3000);
         } catch (err: any) {
+            console.error("Erro ao redefinir senha:", err);
             setError(err.message || 'Falha ao redefinir a senha.');
         } finally {
             setIsLoading(false);
@@ -29,10 +53,10 @@ export const ForgotPassword: React.FC = () => {
 
     return (
         <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-            {/* Background Decorative Elements */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            {/* Background Effects */}
+            <div className="fixed inset-0 pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[128px] animate-float"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[128px] animate-float" style={{ animationDelay: '2s' }}></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[128px] animate-float" style={{ animationDelay: '3s' }}></div>
             </div>
 
             <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
@@ -42,10 +66,10 @@ export const ForgotPassword: React.FC = () => {
                     </div>
                 </div>
                 <h2 className="mt-2 text-center text-3xl font-extrabold text-white">
-                    Recuperar Senha
+                    Redefinir Senha
                 </h2>
                 <p className="mt-2 text-center text-sm text-slate-400">
-                    Digite seu email para receber um link de redefinição.
+                    Digite sua nova senha abaixo.
                 </p>
             </div>
 
@@ -64,23 +88,43 @@ export const ForgotPassword: React.FC = () => {
                         )}
 
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-slate-300">
-                                Email
+                            <label htmlFor="password" className="block text-sm font-medium text-slate-300">
+                                Nova Senha
                             </label>
                             <div className="mt-1 relative rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-slate-500" />
+                                    <Lock className="h-5 w-5 text-slate-500" />
                                 </div>
                                 <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
+                                    id="password"
+                                    name="password"
+                                    type="password"
                                     required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     className="block w-full pl-10 pr-3 py-2 bg-slate-800/50 border border-slate-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-slate-500 transition-all focus:bg-slate-800"
-                                    placeholder="seu@email.com"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-300">
+                                Confirmar Nova Senha
+                            </label>
+                            <div className="mt-1 relative rounded-md shadow-sm">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="h-5 w-5 text-slate-500" />
+                                </div>
+                                <input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type="password"
+                                    required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="block w-full pl-10 pr-3 py-2 bg-slate-800/50 border border-slate-700 text-white rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-slate-500 transition-all focus:bg-slate-800"
+                                    placeholder="••••••••"
                                 />
                             </div>
                         </div>
@@ -91,26 +135,11 @@ export const ForgotPassword: React.FC = () => {
                                 disabled={isLoading}
                                 className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-lg shadow-blue-600/20 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isLoading ? 'Enviando...' : 'Enviar Link'}
+                                {isLoading ? 'Redefinindo...' : 'Salvar Nova Senha'}
                                 <ArrowRight className="ml-2 -mr-1 h-4 w-4" />
                             </button>
                         </div>
                     </form>
-
-                    <div className="mt-6">
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-slate-700" />
-                            </div>
-                        </div>
-
-                        <div className="mt-6 flex justify-center">
-                            <Link to="/login" className="flex items-center text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Voltar para o Login
-                            </Link>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

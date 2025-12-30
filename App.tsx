@@ -8,6 +8,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 import { Profile } from './pages/Profile';
 import { History } from './pages/History';
 import Pricing from './pages/Pricing'; // Import Pricing page
@@ -35,6 +36,7 @@ const App: React.FC = () => {
           } />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/pricing" element={<Pricing />} /> {/* Public Pricing Page */}
 
         </Routes>
